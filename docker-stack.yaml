@@ -1,0 +1,112 @@
+version: '3.7'
+volumes:
+  nodedata:
+    name: venari-devops
+  userdb:
+    name: venari-userdb #Important! Make sure this is not on a volume backed by a network share (i.e. nfs)
+networks:
+  venari:
+    external: true
+    name: venari-devops
+secrets:
+  jobnode-client-secret:
+    external: true
+    name: jobnode-client-secret
+#  server-ssl-cert.pfx:
+#    external: true
+#    name: server-ssl-cert.pfx
+#  server-ssl-cert.pwd:
+#    external: true
+#    name: server-ssl-cert.pwd
+services:
+  venarimaster:
+    command:
+    - "--logging:loglevel:default=warning"
+    - "--connectionStrings:userDatabase=Data Source=/local-storage/venari-users.db"
+
+    - "--server:loglevel=warn"
+    - "--server:tlsPort=9000"
+    - "--server:deleteRulesOnStartup=false"
+    - "--server:NodeHubTimeoutSeconds=300"
+    - "--server:ignorecerterrors=true"
+
+    - "--node:disablejobqueue=true"
+    - "--node:analyzerinprocess=false"
+    - "--node:RootAppDataDirectoryOverride=/Data"
+
+    - "--identity:adminUserName=${ADMIN_EMAIL}"
+    - "--identity:publicUrl=${PUBLIC_MASTER_BASEURL}:${PUBLIC_MASTER_PORT}"
+
+    - "--identity:local:enabled=true"
+    - "--identity:local:allowedIssuers:0=${PUBLIC_MASTER_BASEURL}:${PUBLIC_MASTER_PORT}/"
+    - "--identity:local:redirectUris:0=${PUBLIC_MASTER_BASEURL}:${PUBLIC_MASTER_PORT}/index.html"
+    - "--identity:local:redirectUris:1=${PUBLIC_MASTER_BASEURL}:${PUBLIC_MASTER_PORT}/silent-refresh.html"
+    - "--identity:local:redirectUris:1=${PUBLIC_MASTER_BASEURL}:${PUBLIC_MASTER_PORT}/download"
+    - "--identity:local:PostLogouttUris:0=${PUBLIC_MASTER_BASEURL}:${PUBLIC_MASTER_PORT}/index.html"
+
+    - "--identity:external:0:Name=OKTA"
+    - "--identity:external:0:enabled=false"
+    - "--identity:external:0:authority=<INSERT_OKTA_AUTHORITY>"
+    - "--identity:external:0:clientid=<INSERT_OKTA_CLIENTID"
+    - "--identity:external:0:scope=openid offline_access profile email"
+
+    deploy:
+#      placement:
+#        constraints:
+#        - node.role == manager
+      replicas: 1
+    environment:
+      bootstrapaccounts__serviceaccounts__0__clientid: jobnode
+      bootstrapaccounts__serviceaccounts__0__scope: jobnode
+      bootstrapaccounts__serviceaccounts__0__secret: file:///run/secrets/jobnode-client-secret
+      bootstrapaccounts__serviceaccounts__0__displayname: "Default Shared Job Node Service Account"
+    image: ${VENARI_IMAGE}
+    networks:
+      venari:
+        aliases:
+          - venarimaster
+    ports:
+      - published: ${PUBLIC_MASTER_PORT:-?err}
+        target: 9000
+        mode: host
+    secrets:
+    - jobnode-client-secret
+#    - server-ssl-cert.pfx
+#    - server-ssl-cert.pwd
+    volumes:
+    - nodedata:/Data:rw
+    - userdb:/local-storage
+  jobnode:
+    command:
+    - "--logging:loglevel:default=warning"
+    - "--node:masterNodeBaseAddress=${PUBLIC_MASTER_BASEURL}:${PUBLIC_MASTER_PORT}"
+    - "--node:analyzerinprocess=false"
+    - "--node:RootAppDataDirectoryOverride=/Data"
+    - "--server:loglevel=warn"
+    - "--server:NodeHubTimeoutSeconds=300"
+    - "--server:ignorecerterrors=true"
+    deploy:
+#      placement:
+#        constraints:
+#        - node.role == worker
+      replicas: 1
+      resources:
+        limits:
+          cpus: '${JOBNODE_CPU}'
+          memory: ${JOBNODE_MEMORY}
+        reservations:
+          cpus: '${JOBNODE_CPU}'
+          memory: ${JOBNODE_MEMORY}
+    image: ${VENARI_IMAGE}
+    networks:
+      venari:
+    environment:
+      node__authinfo__clientsecret: file:///run/secrets/jobnode-client-secret
+    secrets:
+    - jobnode-client-secret
+    volumes:
+    - nodedata:/Data:rw
+    - type: tmpfs
+      target: /dev/shm
+      tmpfs:
+          size: 1073741824
