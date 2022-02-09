@@ -68,8 +68,16 @@ docker pull assertsecurity.azurecr.io/venari:3.5
 
 Make sure you execute the following steps from the root of this source code repository.
 
+For Windows and Linux:
+
 ```
 docker-compose --env-file ./settings.env up
+```
+
+For Mac:
+
+```
+docker-compose --env-file ./settings-mac.env up
 ```
 
 
@@ -121,8 +129,16 @@ Both the `PUBLIC_MASTER_PORT` and `PUBLIC_AUTHSERVER_PORT` must be opened for Ve
 
 Run the following command from the `swarm master node` and from the folder where the  `setting.env` and `docker-stack.yaml` files are saved.
 
+For Windows and Linux:
+
 ```bash
 source ./settings.env && docker stack deploy -c docker-stack.yaml venari-devops --with-registry-auth
+```
+
+For Mac:
+
+```bash
+source ./settings-mac.env && docker stack deploy -c docker-stack.yaml venari-devops --with-registry-auth
 ```
 
 ## Setup admin password and license
