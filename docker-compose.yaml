@@ -31,7 +31,7 @@ services:
       - "--identity:local:allowedIssuers:1=https://venarimaster:9000/"
       - "--identity:local:redirectUris:0=${PUBLIC_MASTER_BASEURL}:${PUBLIC_MASTER_PORT}/index.html"
       - "--identity:local:redirectUris:1=${PUBLIC_MASTER_BASEURL}:${PUBLIC_MASTER_PORT}/silent-refresh.html"
-      - "--identity:local:redirectUris:1=${PUBLIC_MASTER_BASEURL}:${PUBLIC_MASTER_PORT}/download"
+      - "--identity:local:redirectUris:2=${PUBLIC_MASTER_BASEURL}:${PUBLIC_MASTER_PORT}/download"
       - "--identity:local:PostLogouttUris:0=${PUBLIC_MASTER_BASEURL}:${PUBLIC_MASTER_PORT}/index.html"
 
       - "--identity:external:0:Name=OKTA"
