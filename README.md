@@ -251,10 +251,19 @@ For the above URLs to work in a browser you may need a trusted SSL certificate c
 
 ## Shutdown the Venari DevOps farm
 
+
 ### If Using Docker Compose
 
+For Windows and Linux:
+
 ```
-docker-compose down
+docker-compose --env-file ./settings.env down
+```
+
+For Mac:
+
+```
+docker-compose --env-file ./settings-mac.env down
 ```
 
 ### If Using Docker Swarm
