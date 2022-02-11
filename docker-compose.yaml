@@ -19,7 +19,7 @@ services:
 
       - "--server:loglevel=info"
       - "--server:tlsPort=9000"
-      - "--server:deleteRulesOnStartup=true"
+      - "--server:deleteRulesOnStartup=false"
       - "--server:NodeHubTimeoutSeconds=300"
       - "--server:ignorecerterrors=true"
 
