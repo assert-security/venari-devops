@@ -35,14 +35,11 @@ services:
     - "--node:RootAppDataDirectoryOverride=/Data"
 
     - "--identity:adminUserName=${ADMIN_EMAIL}"
-    - "--identity:publicUrl=${PUBLIC_MASTER_BASEURL}:${PUBLIC_MASTER_PORT}"
+    - "--identity:publicUrl=${PUBLIC_MASTER_URL}"
 
     - "--identity:local:enabled=true"
-    - "--identity:local:allowedIssuers:0=${PUBLIC_MASTER_BASEURL}:${PUBLIC_MASTER_PORT}/"
-    - "--identity:local:redirectUris:0=${PUBLIC_MASTER_BASEURL}:${PUBLIC_MASTER_PORT}/index.html"
-    - "--identity:local:redirectUris:1=${PUBLIC_MASTER_BASEURL}:${PUBLIC_MASTER_PORT}/silent-refresh.html"
-    - "--identity:local:redirectUris:2=${PUBLIC_MASTER_BASEURL}:${PUBLIC_MASTER_PORT}/download"
-    - "--identity:local:PostLogouttUris:0=${PUBLIC_MASTER_BASEURL}:${PUBLIC_MASTER_PORT}/index.html"
+    - "--identity:local:allowedIssuers:0=${PUBLIC_MASTER_URL}/"
+    - "--identity:local:PostLogouttUris:0=${PUBLIC_MASTER_URL}/index.html"
 
     - "--identity:external:0:Name=OKTA"
     - "--identity:external:0:enabled=false"
@@ -79,7 +76,7 @@ services:
   jobnode:
     command:
     - "--logging:loglevel:default=warning"
-    - "--node:masterNodeBaseAddress=${PUBLIC_MASTER_BASEURL}:${PUBLIC_MASTER_PORT}"
+    - "--node:masterNodeBaseAddress=${PUBLIC_MASTER_URL}"
     - "--node:analyzerinprocess=false"
     - "--node:RootAppDataDirectoryOverride=/Data"
     - "--server:loglevel=warn"

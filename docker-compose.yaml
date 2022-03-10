@@ -6,7 +6,7 @@ services:
       - nodedata:/Data
       - userdb:/local-storage
     ports:
-      - "9000:9000"
+      - "${PUBLIC_MASTER_PORT}:9000"
     command:
       - "--logging:loglevel:default=warning"
       - "--connectionStrings:userDatabase=Data Source=/local-storage/venari-users.db"
@@ -24,15 +24,12 @@ services:
       - "--server:ignorecerterrors=true"
 
       - "--identity:adminUserName=${ADMIN_EMAIL}"
-      - "--identity:publicUrl=${PUBLIC_MASTER_BASEURL}:${PUBLIC_MASTER_PORT}"
+      - "--identity:publicUrl=${PUBLIC_MASTER_URL}"
 
       - "--identity:local:enabled=true"
-      - "--identity:local:allowedIssuers:0=${PUBLIC_MASTER_BASEURL}:${PUBLIC_MASTER_PORT}/"
+      - "--identity:local:allowedIssuers:0=${PUBLIC_MASTER_URL}/"
       - "--identity:local:allowedIssuers:1=https://venarimaster:9000/"
-      - "--identity:local:redirectUris:0=${PUBLIC_MASTER_BASEURL}:${PUBLIC_MASTER_PORT}/index.html"
-      - "--identity:local:redirectUris:1=${PUBLIC_MASTER_BASEURL}:${PUBLIC_MASTER_PORT}/silent-refresh.html"
-      - "--identity:local:redirectUris:2=${PUBLIC_MASTER_BASEURL}:${PUBLIC_MASTER_PORT}/download"
-      - "--identity:local:PostLogouttUris:0=${PUBLIC_MASTER_BASEURL}:${PUBLIC_MASTER_PORT}/index.html"
+      - "--identity:local:PostLogouttUris:0=${PUBLIC_MASTER_URL}/index.html"
 
       - "--identity:external:0:Name=OKTA"
       - "--identity:external:0:enabled=false"
