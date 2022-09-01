@@ -65,7 +65,6 @@ services:
     ports:
       - published: ${PUBLIC_MASTER_PORT:-?err}
         target: 9000
-        mode: host
     secrets:
     - jobnode-client-secret
 #    - server-ssl-cert.pfx
