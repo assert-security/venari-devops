@@ -29,7 +29,7 @@ services:
       - "--identity:local:enabled=true"
       - "--identity:local:allowedIssuers:0=${PUBLIC_MASTER_URL}/"
       - "--identity:local:allowedIssuers:1=https://venarimaster:9000/"
-      - "--identity:local:PostLogouttUris:0=${PUBLIC_MASTER_URL}/index.html"
+      - "--identity:local:PostLogoutUris:0=${PUBLIC_MASTER_URL}/index.html"
 
       - "--identity:external:0:Name=OKTA"
       - "--identity:external:0:enabled=false"
