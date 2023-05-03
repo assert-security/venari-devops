@@ -165,6 +165,24 @@ For Mac:
 source ./settings-mac.env && docker stack deploy -c docker-stack.yaml venari-devops --with-registry-auth
 ```
 
+## Running a DevOps Farm using Kubernetes
+
+<br>
+Note: The helm scripts located in venari-helm are designed as a proof of concept and will only work without changes if running Kubernetes on docker desktop and have already installed helm.
+
+1. Open your terminal or command window to the root directory of this Git source code repository.
+
+2. Execute the following commands in the order shown below.
+
+```
+kubectl create -f ./venari-helm/pv-volume.yaml
+kubectl create -f ./venari-helm/pv-claim.yaml
+helm install venari-devops ./venari-helm
+```
+
+
+Note the nodePort is set to 31000 by default. You will need to access the master node using https://host.docker.internal:31000/
+
 ## Setup admin Password and License Information
 
 <b>

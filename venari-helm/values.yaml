@@ -1,0 +1,145 @@
+# Default values for venari-helm.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+publicUrl: https://host.docker.internal:31000
+venariMasterUrl: https://host.docker.internal:9000
+replicaCount: 1
+
+image:
+  repository: localacr.assertsecurity.io/venari-integrations
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "4.0"
+
+venarimaster:
+  containerPort: 9000
+  args: 
+    - "--logging:loglevel:default=warning"
+    - "--connectionStrings:userDatabase=Data Source=/Data/venari-users.db"
+    - "--node:disablejobqueue=true"
+    - "--node:analyzerinprocess=false"
+    - "--node:useHttps=true"
+    - "--node:RootAppDataDirectoryOverride=/Data"
+    - "--node:ListenAnyAddress=true"
+    - "--server:loglevel=info"
+    - "--server:tlsPort=9000"
+    - "--server:deleteRulesOnStartup=false"
+    - "--server:NodeHubTimeoutSeconds=300"
+    - "--server:ignorecerterrors=true"
+    - "--identity:adminUserName=admin"
+    - "--identity:publicUrl=https://host.docker.internal:31000"
+    - "--identity:local:enabled=true"
+    - "--identity:local:allowedIssuers:0=https://host.docker.internal:31000/"
+    - "--identity:local:allowedIssuers:1=https://host.docker.internal:9000/"
+    - "--identity:local:PostLogoutUris:0=https://host.docker.internal:31000/index.html"
+    - "--bootstrapAccounts:generateJobNodeSecretToFile=/Data/venari-jobnode-login.txt"
+    - "--bootstrapAccounts:serviceAccounts:0:clientId=jobnode"
+    - "--bootstrapAccounts:serviceAccounts:0:scope=jobnode"
+    - "--bootstrapAccounts:serviceAccounts:0:secret=file:///Data/venari-jobnode-login.txt"
+    - "--bootstrapAccounts:serviceAccounts:0:displayName=DevOps Job Node"
+
+  resources:
+    limits:
+      cpu: '4'
+      memory: 16Gi
+    requests:
+      cpu: '4'
+      memory: 14Gi
+
+jobnode:
+  containerPort: 9001
+  args: 
+    - "--logging:loglevel:default=warning"
+    - "--node:masterNodeBaseAddress=https://host.docker.internal:31000"
+    - "--node:analyzerinprocess=false"
+    - "--node:RootAppDataDirectoryOverride=/Data"
+    - "--server:tlsPort=9001"
+    - "--server:loglevel=info"
+    - "--server:NodeHubTimeoutSeconds=300"
+    - "--server:ignorecerterrors=true"
+    - "--node:authInfo:clientId=jobnode"
+    - "--node:authInfo:clientSecret=file:///Data/venari-jobnode-login.txt"
+    - "--node:authInfo:scope=jobnode"
+  resources:
+    limits:
+      cpu: '4'
+      memory: 16Gi
+    requests:
+      cpu: '4'
+      memory: 14Gi
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: NodePort
+  port: 443
+
+ingress:
+  enabled: true
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: host.docker.internal
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+    - host: host.docker.internal
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

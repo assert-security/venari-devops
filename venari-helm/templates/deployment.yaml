@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "venari-devops.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "venari-devops.name" . }}
+    helm.sh/chart: {{ include "venari-devops.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "venari-devops.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "venari-devops.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      volumes:
+      - name: task-pv-storage
+        persistentVolumeClaim:
+          claimName: task-pv-claim
+      - name: dshm
+        emptyDir:
+          medium: Memory
+          sizeLimit: 2Gi
+      containers:
+        - name: "{{ .Chart.Name }}-venarimaster"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: [{{  range .Values.venarimaster.args }}"{{ . }}",{{ end }}]
+          ports:
+            - name: controller
+              containerPort: {{ .Values.venarimaster.containerPort }}
+              protocol: TCP
+          volumeMounts:
+            - mountPath: "/Data"
+              name: task-pv-storage
+          resources:
+                requests:
+                  memory: "{{ .Values.venarimaster.resources.requests.memory }}"
+                  cpu: "{{ .Values.venarimaster.resources.requests.cpu }}"
+                limits:
+                  memory: "{{ .Values.venarimaster.resources.limits.memory }}"
+                  cpu: "{{ .Values.venarimaster.resources.limits.cpu }}"
+        - name: "{{ .Chart.Name }}-jobnode"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: [{{  range .Values.jobnode.args }}"{{ . }}",{{ end }}]
+          ports:
+            - name: jobnode
+              containerPort: {{ .Values.jobnode.containerPort }}
+              protocol: TCP
+          volumeMounts:
+            - mountPath: "/Data"
+              name: task-pv-storage
+            - mountPath: /dev/shm
+              name: dshm
+          resources:
+                requests:
+                  memory: "{{ .Values.jobnode.resources.requests.memory }}"
+                  cpu: "{{ .Values.jobnode.resources.requests.cpu }}"
+                limits:
+                  memory: "{{ .Values.jobnode.resources.limits.memory }}"
+                  cpu: "{{ .Values.jobnode.resources.limits.cpu }}"                  

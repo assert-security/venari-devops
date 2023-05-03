@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "venari-devops.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "venari-devops.name" . }}
+    helm.sh/chart: {{ include "venari-devops.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: 9000
+      protocol: TCP
+      nodePort: 31000
+      name: controller
+  selector:
+    app.kubernetes.io/name: {{ include "venari-devops.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
