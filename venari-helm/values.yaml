@@ -7,7 +7,7 @@ venariMasterUrl: https://host.docker.internal:9000
 replicaCount: 1
 
 image:
-  repository: localacr.assertsecurity.io/venari-integrations
+  repository: assertsecurity.azurecr.io/venari
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "4.0"
