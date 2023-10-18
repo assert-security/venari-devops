@@ -1,0 +1,39 @@
+## Use the image name and tag from the repository containing the venari-devops image
+## The value given is the Assert Security repository. Typically you will need to 
+## pull this image and upload to your cloud provider's repository
+image:
+  repository: assertsecurity.azurecr.io/venari
+  tag: "4.1"
+
+## By setting resources.enabled to true, the resources given will be used
+## Typically the venari controller will need 2-6 CPU and 4-16 Gi of memory
+## The correct amount of resources needed will depend on the number
+## of concurrently running job nodes and concurrent users
+venarimaster:
+  resources:
+    enabled: false
+    limits:
+      cpu: '4'
+      memory: 8Gi
+    requests:
+      cpu: '4'
+      memory: 8Gi
+
+## You must specify the host name used to access the venari controller
+ingress:
+  hostName: ""
+
+## You must specify the IP address used to access the venari controller
+service:
+  loadBalancerIP: ""
+
+## For storage it is recommended to use persistent ssd storage
+## NFS storage can work as well but in some setup's there
+## has been degradation in performance and database inconsistencies
+## Use NFS only after establishing a baseline with ssd
+## and the NFS performs comparably
+## All job data will after completion be uploaded to the controller
+## So this storage must be larger than the job node storage
+## Recommended size is 1 TB
+persistence:
+  existingClaim: ""

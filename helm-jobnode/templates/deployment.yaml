@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "venari-devops-jobnode.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "venari-devops-jobnode.name" . }}
+    helm.sh/chart: {{ include "venari-devops-jobnode.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.jobnode.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "venari-devops-jobnode.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "venari-devops-jobnode.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      volumes:
+        - name: venari-jobnode-data
+          {{- if .Values.persistence.existingClaim }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 2Gi
+        - name: venari-devops-certificate
+          secret:
+            secretName: venari-devops-certificate
+      containers:
+        - name: "{{ .Chart.Name }}-jobnode"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: [{{  range .Values.jobnode.args }}"{{ . }}",{{ end }}]
+          ports:
+            - name: jobnode
+              containerPort: {{ .Values.jobnode.containerPort }}
+              protocol: TCP
+          env:
+          - name: node__masterNodeBaseAddress
+            value: "https://{{ .Values.ingress.hostName }}"
+          {{- if .Values.persistence.allowedJobNodeCount }}
+          - name: server__allowedjobnodecount
+            value: "{{ .Values.persistence.allowedJobNodeCount }}"
+          {{- end }}
+          {{- if .Values.secrets.secretsDir }}
+          - name: server__secrets__dir
+            value: {{ .Values.secrets.secretsDir }}
+          {{- end }}
+          - name: node__authInfo__clientSecret
+            valueFrom:
+              secretKeyRef:
+                name: venari-devops-secrets
+                key: node-authInfo-clientSecret.pwd
+          volumeMounts:
+            - mountPath: "/Data"
+              name: venari-jobnode-data
+            - mountPath: /dev/shm
+              name: dshm
+          {{- if .Values.jobnode.resources.enabled }}    
+          resources:
+            requests:
+              memory: "{{ .Values.jobnode.resources.requests.memory }}"
+              cpu: "{{ .Values.jobnode.resources.requests.cpu }}"
+            limits:
+              memory: "{{ .Values.jobnode.resources.limits.memory }}"
+              cpu: "{{ .Values.jobnode.resources.limits.cpu }}"
+          {{- end }}

@@ -1,0 +1,42 @@
+## Use the image name and tag from the repository containing the venari-devops image
+## The value given is the Assert Security repository. Typically you will need to 
+## pull this image and upload to your cloud provider's repository
+image:
+  repository: assertsecurity.azurecr.io/venari
+  tag: "4.1"
+
+## By setting resources.enabled to true, the resources given will be used
+## Typically the venari jobnode will need 4-8 CPU and 12-32 Gi of memory
+## The correct amount of resources needed will depend on the complexity
+## of the web sites being scanned. Set the replicaCount equal to the
+## number of licensed job nodes you have.
+jobnode:
+  replicaCount: 1
+  resources:
+    enabled: false
+    limits:
+      cpu: '6'
+      memory: 16Gi
+    requests:
+      cpu: '6'
+      memory: 16Gi
+
+## For storage it is recommended to use persistent ssd storage
+## NFS storage can work as well but in some setup's there
+## has been degradation in performance and database inconsistencies.
+## Use NFS only after establishing a baseline with ssd
+## and the NFS performs comparably.
+## The job node storage only needs to be big enough to complete
+## a single job. Some large web site scans can take 50 Gi or more.
+## Make sure there is a ulimit for core dumps so that core
+## dumps from the internal browsers do not exceed the space requirements.
+## Recommended size is 100 Gi
+## When using a separate persistent storage for each job node
+## make sure to set allowedJobNodeCount=1.
+persistence:
+  existingClaim: ""
+  allowedJobNodeCount: ""
+
+## You must specify the host name used to access the venari controller
+ingress:
+  hostName: ""

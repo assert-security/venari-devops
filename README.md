@@ -68,7 +68,7 @@ docker login -u <user> -p <token> assertsecurity.azurecr.io
 ### Pull the VEnari DevOps Docker Image
 
 ```
-docker pull assertsecurity.azurecr.io/venari:3.5
+docker pull assertsecurity.azurecr.io/venari:4.1
 ```
 
 ## Running a DevOps Farm using Docker Compose
@@ -165,10 +165,56 @@ For Mac:
 source ./settings-mac.env && docker stack deploy -c docker-stack.yaml venari-devops --with-registry-auth
 ```
 
-## Running a DevOps Farm using Kubernetes
+## Running a DevOps Farm using Kubernetes Cloud (GKE/EKS)
 
-<br>
-Note: The helm scripts located in venari-helm are designed as a proof of concept and will only work without changes if running Kubernetes on docker desktop and have already installed helm.
+**Note:** You must have a working cloud shell with helm installed to continue with these steps.
+
+1. Change directory in a terminal shell to the root of the cloned venari-devops github repository (https://github.com/assert-security/venari-devops.git)
+2. Create values-override.yaml files
+
+```bash
+cp ./helm-controller/example-values-override.yaml to ./helm-controller/values-override.yaml
+cp ./helm-jobnode/example-values-override.yaml to ./helm-jobnode/values-override.yaml
+```
+3. Fill out valid values for your cloud environment in these two files. Documentation for how to set each value is inline in each file.
+4. Make sure a cluster is used which will be able to serve the resources configured in both values-override.yaml files
+5. Make sure the necessary persistent volume claims exist in the cluster to support the existingClaim values used in the values-override.yaml files
+6. Create client secret for authentication of jobnode with controller.
+
+```bash
+mkdir secrets
+uuidgen > ./secrets/node-authInfo-clientSecret.pwd
+```
+7. Create PFX file for the hostname of your Venari controller's TLS certificate. Below is an example command to create from a server crt file plus crt bundle file aggregated as a pem file and a private key file
+
+```bash
+openssl.exe pkcs12 -in server.pem -inkey privatekey.key -export -out ./secrets/server-ssl-cert.pfx
+```
+8. Create a file at ./secrets/server-ssl-cert.pwd with the password for the previously created server-ssl-cert.pfx file.
+9. Create the Kubernetes secrets
+
+```bash
+kubectl create secret generic venari-devops-secrets --from-file ./secrets/server-ssl-cert.pwd --from-file ./secrets/node-authInfo-clientSecret.pwd
+kubectl create secret generic venari-devops-certificate --from-file ./secrets/server-ssl-cert.pfx
+```
+10. Install the Venari controller helm chart. On first install the Venari controller will take extra time to compute CPE keywords in the database. This can take several minutes and there will be an indication of this in the container logs. This step must have been completed before you will be able to test accessing the controller. Also, each time a version upgrade happens on the Venari image it will need to compute CPE keywords again with a similar wait.
+
+```bash
+helm install venari-devops-controller --values ./helm-controller/values-override.yaml ./helm-controller
+```
+11. Follow the instructions in this readme.md for 'Setup admin Password and License Information' using your host name instead of host.docker.internal
+12. Click on the Downloads menu
+13. Click the download link for your operating system and install the Venari UI
+14. Install the Venari job node helm chart
+
+```bash
+helm install venari-devops-jobnode --values ./helm-jobnode/values-override.yaml ./helm-controller
+```
+15. Follow the instructions in this readme.md for 'Verify Scan Farm Deployment from Venari UI' to validate your Venari DevOps installation for the Venari UI. Use your host name instead of host.docker.internal
+
+## Running a DevOps Farm using Kubernetes MiniKube
+
+**Note:** The helm scripts located in helm-minikube are designed as a proof of concept and will only work without changes if running Kubernetes on a minikube and have already installed helm.
 
 1. Open your terminal or command window to the root directory of this Git source code repository.
 

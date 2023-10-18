@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "venari-devops-controller.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "venari-devops-controller.name" . }}
+    helm.sh/chart: {{ include "venari-devops-controller.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "venari-devops-controller.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "venari-devops-controller.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      volumes:
+        - name: venari-orchestrator-data
+          {{- if .Values.persistence.existingClaim }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 2Gi
+        - name: venari-devops-certificate
+          secret:
+            secretName: venari-devops-certificate
+      containers:
+        - name: "{{ .Chart.Name }}-venarimaster"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: [{{  range .Values.venarimaster.args }}"{{ . }}",{{ end }}]
+          ports:
+            - name: controller
+              containerPort: {{ .Values.venarimaster.containerPort }}
+              protocol: TCP
+          env:
+          - name: identity__publicUrl
+            value: "https://{{ .Values.ingress.hostName }}"
+          - name: identity__local__allowedIssuers__0
+            value: "https://{{ .Values.ingress.hostName }}/"
+          - name: identity__local__allowedIssuers__1
+            value: "https://{{ .Values.ingress.hostName }}:9000/"
+          - name: identity__local__PostLogoutUris__0
+            value: "https://{{ .Values.ingress.hostName }}/index.html"
+          {{- if .Values.secrets.secretsDir }}
+          - name: server__secrets__dir
+            value: {{ .Values.secrets.secretsDir }}
+          {{- end }}
+          - name: server__ssl__certpwd
+            valueFrom:
+              secretKeyRef:
+                name: venari-devops-secrets
+                key: server-ssl-cert.pwd
+          - name: bootstrapAccounts__serviceAccounts__0__secret
+            valueFrom:
+              secretKeyRef:
+                name: venari-devops-secrets
+                key: node-authInfo-clientSecret.pwd
+          volumeMounts:
+            - mountPath: "/Data"
+              name: venari-orchestrator-data
+            - mountPath: {{ .Values.secrets.secretsDir }}
+              name: venari-devops-certificate
+              readOnly: true
+          {{- if .Values.venarimaster.resources.enabled }}    
+          resources:
+            requests:
+              memory: "{{ .Values.venarimaster.resources.requests.memory }}"
+              cpu: "{{ .Values.venarimaster.resources.requests.cpu }}"
+            limits:
+              memory: "{{ .Values.venarimaster.resources.limits.memory }}"
+              cpu: "{{ .Values.venarimaster.resources.limits.cpu }}"
+          {{- end }}

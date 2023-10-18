@@ -1,0 +1,95 @@
+
+image:
+  repository: ""
+  pullPolicy: Always
+  tag: ""
+
+venarimaster:
+  containerPort: 443
+  args: 
+    - "--logging:loglevel:default=warning"
+    - "--connectionStrings:userDatabase=Data Source=/Data/venari-users.db"
+    - "--node:disablejobqueue=true"
+    - "--node:analyzerinprocess=false"
+    - "--node:useHttps=true"
+    - "--node:RootAppDataDirectoryOverride=/Data"
+    - "--node:ListenAnyAddress=true"
+    - "--server:loglevel=info"
+    - "--server:tlsPort=443"
+    - "--server:deleteRulesOnStartup=false"
+    - "--server:NodeHubTimeoutSeconds=300"
+    - "--server:ignorecerterrors=true"
+    - "--identity:adminUserName=admin"
+    - "--identity:local:enabled=true"
+    - "--bootstrapAccounts:serviceAccounts:0:clientId=jobnode"
+    - "--bootstrapAccounts:serviceAccounts:0:scope=jobnode"
+    - "--bootstrapAccounts:serviceAccounts:0:displayName=DevOps Job Node"
+
+  resources:
+    enabled: false
+    limits:
+      cpu: '4'
+      memory: 8Gi
+    requests:
+      cpu: '4'
+      memory: 8Gi
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+ingress:
+  enabled: true
+  className: ""
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hostName: "venari-devops.assertsecurity.io"
+
+resources: {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+service:
+  port: 443
+  type: LoadBalancer
+  loadBalancerIP: ""
+
+persistence:
+  existingClaim: ""
+
+secrets:
+  secretsDir: "/etc/secrets"
