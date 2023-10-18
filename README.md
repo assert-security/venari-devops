@@ -208,7 +208,7 @@ helm install venari-devops-controller --values ./helm-controller/values-override
 14. Install the Venari job node helm chart
 
 ```bash
-helm install venari-devops-jobnode --values ./helm-jobnode/values-override.yaml ./helm-controller
+helm install venari-devops-jobnode --values ./helm-jobnode/values-override.yaml ./helm-jobnode
 ```
 15. Follow the instructions in this readme.md for 'Verify Scan Farm Deployment from Venari UI' to validate your Venari DevOps installation for the Venari UI. Use your host name instead of host.docker.internal
 
