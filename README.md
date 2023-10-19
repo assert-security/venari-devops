@@ -173,8 +173,8 @@ source ./settings-mac.env && docker stack deploy -c docker-stack.yaml venari-dev
 2. Create values-override.yaml files
 
 ```bash
-cp ./helm-controller/example-values-override.yaml to ./helm-controller/values-override.yaml
-cp ./helm-jobnode/example-values-override.yaml to ./helm-jobnode/values-override.yaml
+cp ./helm-controller/example-values-override.yaml ./helm-controller/values-override.yaml
+cp ./helm-jobnode/example-values-override.yaml ./helm-jobnode/values-override.yaml
 ```
 3. Fill out valid values for your cloud environment in these two files. Documentation for how to set each value is inline in each file.
 4. Make sure a cluster is used which will be able to serve the resources configured in both values-override.yaml files
