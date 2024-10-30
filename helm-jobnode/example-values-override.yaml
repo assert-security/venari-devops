@@ -2,8 +2,8 @@
 ## The value given is the Assert Security repository. Typically you will need to 
 ## pull this image and upload to your cloud provider's repository
 image:
-  repository: assertsecurity.azurecr.io/venari
-  tag: "4.1"
+  repository: registry.assertsecurity.io/venari
+  tag: "5.0"
 
 ## By setting resources.enabled to true, the resources given will be used
 ## Typically the venari jobnode will need 4-8 CPU and 12-32 Gi of memory

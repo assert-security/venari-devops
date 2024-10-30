@@ -68,7 +68,7 @@ docker login -u <user> -p <token> assertsecurity.azurecr.io
 ### Pull the VEnari DevOps Docker Image
 
 ```
-docker pull assertsecurity.azurecr.io/venari:4.1
+docker pull registry.assertsecurity.io/venari:5.0
 ```
 
 ## Running a DevOps Farm using Docker Compose
@@ -228,6 +228,13 @@ helm install venari-devops ./venari-helm
 
 
 Note the nodePort is set to 31000 by default. You will need to access the master node using https://host.docker.internal:31000/
+
+### Upgrading Venari Devops to 5.0 in Kubernetes setup
+
+1) Edit values-override.yaml in helm-controller
+2) Change image->tag attribute to "5.0" or to pin to a specific version "5.0.169"
+3) Edit values-override.yaml in helm-jobnode
+4) Change image->tag attribute to "5.0" or to pin to a specific version "5.0.169"
 
 ## Setup admin Password and License Information
 
