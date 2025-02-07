@@ -62,7 +62,7 @@ To setup Venari DevOps and use it in the simple setup described below, you must 
 You must login to the Assert Security private container registry before you can pull down Venari images. You should have received an e-mail from Assert Security containing the docker login command to use for our docker repository.  It will be in the below format:
 
 ```
-docker login -u <user> -p <token> assertsecurity.azurecr.io
+docker login -u <user> -p <token> registry.assertsecurity.io
 ```
 
 ### Pull the VEnari DevOps Docker Image

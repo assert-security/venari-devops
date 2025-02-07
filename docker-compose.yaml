@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   venarimaster:
-    image: ${VENARI_IMAGE:-assertsecurity.azurecr.io/venari:3.5}
+    image: ${VENARI_IMAGE:-registry.assertsecurity.io/venari:5.0}
     volumes:
       - nodedata:/Data
       - userdb:/local-storage
@@ -49,7 +49,7 @@ services:
         aliases:
           - venarimaster
   jobnode:
-    image: ${VENARI_IMAGE:-assertsecurity.azurecr.io/venari:3.5}
+    image: ${VENARI_IMAGE:-registry.assertsecurity.io/venari:5.0}
     deploy:
       replicas: 1
       resources:
